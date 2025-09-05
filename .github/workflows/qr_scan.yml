@@ -25,7 +25,7 @@ jobs:
         run: python scripts/scan_qr.py
 
       - name: Upload Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: qr-scan-report
           path: reports/qr_scan_report.md
