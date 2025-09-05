@@ -2,3 +2,8 @@ pyzbar
 pillow
 opencv-python
 requests
+pdf2image
+python-docx
+markdown
+reportlab
+
