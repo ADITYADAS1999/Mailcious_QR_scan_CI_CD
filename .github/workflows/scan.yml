@@ -1,0 +1,31 @@
+name: QR Code Security Scan
+
+on:
+  push:
+    paths:
+      - "qr_images/**"
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run QR Scanner
+        run: python scripts/scan_qr.py
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: qr-scan-report
+          path: reports/qr_scan_report.md
