@@ -13,22 +13,24 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Install ZBar
-        run: sudo apt-get update && sudo apt-get install -y libzbar0
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libzbar0 poppler-utils
+
+      - name: Install Python Dependencies
         run: pip install -r requirements.txt
 
       - name: Run QR Scanner
         run: python scripts/scan_qr.py
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: qr-scan-report
-          path: reports/qr_scan_report.md
+          name: qr-scan-reports
+          path: reports/
