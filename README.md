@@ -12,33 +12,45 @@ Mailcious_QR_scan_CI_CD is a GitHub Actions workflow that automatically scans QR
 ![logo](https://github.com/user-attachments/assets/5ccf6f4b-6e3d-4472-be96-75ddda499fbd)
 
 
-# 🔐 Automated Docker image Security Scanner  
+# 🔐 Mailcious_QR_scan_CI_CD
 
 
-In the modern era, most organizations have shifted from **monolithic architectures** to **microservices-based applications** deployed in **containerized environments** such as Docker and Kubernetes. While this transition improves scalability, agility, and deployment speed, it also introduces **new security challenges**. With CI/CD pipelines powering rapid software delivery, ensuring security at every stage—known as **DevSecOps**—has become a critical requirement.  
+In today’s digital landscape, attackers are increasingly leveraging **social engineering vectors** such as **QR codes** embedded in documents and images to deliver **phishing links, malicious payloads, or hidden scripts**. While CI/CD pipelines accelerate software delivery, they can also become a weak link if weaponized content slips through undetected.  
 
-One of the major concerns in this landscape is the **detection and remediation of vulnerabilities** in Docker images, application code, and dependencies. Without continuous scanning and compliance mapping, organizations risk exposing their systems to attackers.  
+Traditional malware scanners often miss **steganography-based QR payloads** or **obfuscated links**, leaving organizations vulnerable to exploitation. With the growing reliance on QR codes in business workflows, ensuring **proactive detection and remediation** has become an essential part of **DevSecOps practices**.  
 
-To address this, we developed a **GitHub Actions workflow** that automatically:  
-- Scans Docker images for vulnerabilities using **Trivy, Bandit, and Docker Scout**.  
-- Generates **JSON and PDF reports** for detailed analysis.  
-- Maps detected vulnerabilities to **NIST Cybersecurity Framework (CSF)**, **MITRE ATT&CK techniques**, and **OWASP Top 10 risks**.  
+---
 
-This project demonstrates **automated DevSecOps practices** and provides a framework for **threat assessment, vulnerability management, and compliance reporting** directly within the CI/CD pipeline.  
+## 🚀 Project Overview
 
+To address this gap, we developed a **GitHub Actions workflow** that automatically:  
+
+- 🔍 Scans images and documents (`.jpg`, `.png`, `.pdf`) for hidden QR codes.  
+- 📖 Extracts and analyzes QR code content for suspicious or malicious patterns.  
+- ⚠️ Flags potential threats such as phishing URLs or encoded payloads.  
+- 📝 Generates detailed security reports as CI/CD artifacts for auditing and remediation.  
+
+This project demonstrates how **automated QR code threat detection** can be embedded into a CI/CD pipeline, helping organizations strengthen their **supply chain security** and prevent attacks before deployment.  
+
+---
 
 ## 📌 Introduction  
-Containers have become the backbone of modern application deployment, but they also introduce unique security challenges.  
-This project, **Automated Docker Security Scanner**, was designed to address those challenges by **automating vulnerability scanning of Docker images and applications**.  
 
-It combines multiple open-source tools and recognized cybersecurity frameworks into a single workflow.  
-The output is a **professional, consolidated PDF report** that organizations can use to detect, analyze, and mitigate security risks.  
+QR codes are widely used for convenience, but they are also being exploited as a **threat vector**.  
+This project, **Mailcious_QR_scan_CI_CD**, was designed to secure CI/CD pipelines by **automatically scanning for malicious QR codes in uploaded files**.  
 
-Key Features:  
-- Scans Docker images and code for vulnerabilities.  
-- Maps findings to **NIST CSF**, **MITRE ATT&CK**, and **OWASP Top 10**.  
-- Automatically runs in **GitHub Actions** for CI/CD pipelines.  
-- Generates a **detailed PDF report** with charts and compliance mappings.  
+By integrating QR scanning and payload analysis directly into **GitHub Actions**, the workflow ensures that no hidden QR-based attack is deployed into production.  
+The output is a **security report** that flags any suspicious findings, enabling quick response and remediation.  
+
+---
+
+## ✨ Key Features  
+
+- 📄 Scans `.pdf`, `.jpg`, and `.png` files for embedded QR codes.  
+- 🔐 Extracts QR data and analyzes it for **malicious links or hidden scripts**.  
+- ⚙️ Runs automatically in **GitHub Actions** as part of the CI/CD pipeline.  
+- 📊 Generates **security reports** for auditing and compliance.  
+
 
 ---
 
@@ -48,33 +60,28 @@ Key Features:
 
 ```bash
 .
+Mailcious_QR_scan_CI_CD-main/
+│── LICENSE                  # Open-source license for usage
+│── README.md                # Project documentation
+│── requirements.txt         # Python dependencies
+│
 ├── .github/
 │   └── workflows/
-│       └── docker-scan.yml        # GitHub Actions workflow (runs scans automatically)
-│
-├── docker/
-│   ├── Dockerfile                 # Custom Dockerfile used for building/scanning
-│   └── app/
-│       └── main.py                # Example Python application code to scan
+│       └── qr_scan.yml      # GitHub Actions workflow definition
 │
 ├── scripts/
-│   ├── generate_report.py         # Combines all scan results and produces a PDF
-│   ├── gen_charts.py              # Optional: Generates Matplotlib charts for reports
-│   └── mappings.py                # Maps findings to NIST CSF, MITRE, and OWASP
+│   └── scan_qr.py           # Main QR scanning logic
 │
-├── assets/
-│   └── severity_chart.png         # Example chart embedded in the final PDF
+├── qr_images/               # Sample test files containing QR codes
+│   ├── my_doc.pdf
+│   ├── qr_01.jpg
+│   ├── qr_02.jpg
+│   ├── qr_03.jpg
+│   └── qr_04.jpg
 │
-├── reports/                       # JSON outputs of all scans
-│   ├── trivy.json                 # Docker image vulnerabilities (Trivy)
-│   ├── bandit.json                # Python code analysis (Bandit)
-│   ├── docker_scout.json          # Dependency scans (Docker Scout)
-│   ├── mitre_T1003.json           # Example MITRE ATT&CK mapping output
-│   └── nist_report.json           # Consolidated report with NIST mapping
-│
-├── requirements.txt               # Python dependencies for scripts
-├── report.pdf                     # Generated PDF report (final output)
-└── README.md
+├── reports/                 # Security scan reports
+│   └── example.txt
+
 ```
 
 **Explanation of structure:**  
