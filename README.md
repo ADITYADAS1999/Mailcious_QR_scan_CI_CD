@@ -1,4 +1,4 @@
-# Mailcious_QR_scan_CI_CD
+# 🔐 Mailcious_QR_scan_CI_CD
 Mailcious_QR_scan_CI_CD is a GitHub Actions workflow that automatically scans QR codes stored in an image folder during each commit or manual trigger. The workflow analyzes QR codes for potentially malicious links, phishing attempts, or unsafe redirects, and generates a detailed security report as a CI/CD artifact.
 
 
@@ -12,7 +12,7 @@ Mailcious_QR_scan_CI_CD is a GitHub Actions workflow that automatically scans QR
 ![logo](https://github.com/user-attachments/assets/5ccf6f4b-6e3d-4472-be96-75ddda499fbd)
 
 
-# 🔐 Mailcious_QR_scan_CI_CD
+
 
 
 In today’s digital landscape, attackers are increasingly leveraging **social engineering vectors** such as **QR codes** embedded in documents and images to deliver **phishing links, malicious payloads, or hidden scripts**. While CI/CD pipelines accelerate software delivery, they can also become a weak link if weaponized content slips through undetected.  
@@ -97,198 +97,102 @@ Mailcious_QR_scan_CI_CD-main/
 
 ## 🛠️ Technology Used  
 
-- **Backend:** Python (scripts for scanning, mapping, and report generation).  
-- **Frontend/Reports:**  
-  - ReportLab → To generate structured PDF reports.  
-  - Matplotlib → To generate severity charts and visual data.  
-- **Security Tools:**  
-  - **Trivy** → Detects vulnerabilities in Docker images.  
-  - **Bandit** → Analyzes Python code for common security issues.  
-  - **Docker Scout** → Checks image dependencies against known CVEs.  
-- **Frameworks:**  
-  - **NIST CSF** → Compliance & categorization.  
-  - **MITRE ATT&CK** → Threat actor technique mapping.  
-  - **OWASP Top 10** → Common web application risks.  
-- **CI/CD:** GitHub Actions (automated scans in pipeline).  
-- **Containerization:** Docker (for image builds and scans).  
+- **Backend:** Python (QR detection, decoding, content analysis).  
+- **Libraries/Tools:**  
+  - OpenCV / Pyzbar → Detect and decode QR codes.  
+  - ReportLab → Generate structured PDF reports.  
+  - Regex / Custom Rules → Identify malicious or suspicious QR patterns.  
+- **CI/CD:** GitHub Actions (automated scans in the pipeline).  
+- **Testing Files:** Sample `.pdf` and `.jpg` documents containing QR codes for validation.  
 
 ---
 
 ## ⚙️ Workflow & Tools Used  
 
-This project includes a **GitHub Actions workflow** (`.github/workflows/docker-scan.yml`) that automates the **DevSecOps security pipeline**.  
-The workflow runs automatically on every push to the `main` branch and executes the following stages:  
+The GitHub Actions workflow (`.github/workflows/qr_scan.yml`) automates the QR code scanning pipeline. It runs automatically whenever files are pushed to the repository.
 
----
-
-### 🔹 1. Build Docker Image  
+### 🔹 1. Install Dependencies
 ```yaml
-- name: Build Docker Image
-  run: docker build -t my-custom-app:latest ./docker
+- name: Install Dependencies
+  run: pip install -r requirements.txt
 ```
 - Tool: Docker
 - Purpose: Builds the application container image from the Dockerfile inside the ./docker directory.
 - Output: A containerized application (my-custom-app:latest) that is ready for security scanning.
 
 
-### 🔹 2. Trivy (Docker Image Vulnerability Scanner)
+### **2. Run QR Scan Script**
+```yaml
+- name: Run QR Scanner
+  run: python scripts/scan_qr.py --input ./qr_images --output ./reports
+```
+- Tool: scan_qr.py
+- Purpose: Scans `.jpg`, `.png`, and `.pdf` files for QR codes, decodes them, and extracts embedded data.
+
+### 🔹 3. Content Analysis
+
+- Identifies malicious URLs, encoded payloads, or hidden scripts within QR data.
+- Uses regex rules and keyword checks (e.g., `http://`, `base64`, suspicious domains).
+- Flags risky patterns for further inspection. 
+
+
+### 🔹 4. Report Generation
+
+- Generates `.txt` and optional PDF reports with flagged findings.
+- Summarizes:
+- File scanned
+- QR content
+- Suspicion level (Safe / Suspicious / Malicious)
+
+### 🔹 5. Upload Artifacts
 
 ```
-- name: Run Trivy Docker Scan
-  run: trivy image --ignore-unfixed --exit-code 0 --format json --output reports/trivy.json my-custom-app:latest
-```
-- Tool: Trivy
-- Purpose: Scans the built Docker image for known vulnerabilities (CVEs) in OS packages and dependencies.
-- Output: reports/trivy.json → JSON report containing vulnerability details with severity levels.
-
-### 🔹 3. Bandit (Python Source Code Analysis)
-
-```
-- name: Run Bandit Scan
-  run: bandit -ll -ii -r . -f json -o reports/bandit.json || true
-```
-- Tool: Bandit
-- Purpose: Performs Static Application Security Testing (SAST) for Python source code.
-- Detects issues such as:
--Insecure function usage (eval, exec)
--Hardcoded credentials
--Insecure file permissions
-- Output: reports/bandit.json → JSON report of security issues in code.
-
-
-### 🔹 4. Docker Scout (Optional Dependency Scanner)
-
-```
-# docker scout quickview
-# docker scout cves
-```
-- Tool: Docker Scout
-- Purpose: Provides insights into container dependencies, image provenance, and supply chain vulnerabilities.
-- Benefit: Complements Trivy by analyzing image layers and dependencies more deeply.
-
-### 🔹 5. MITRE ATT&CK (Atomic Red Team Simulation)
-
-```
-- name: Run Atomic Red Team (MITRE ATT&CK)
-  shell: pwsh
-  run: |
-    git clone https://github.com/redcanaryco/atomic-red-team.git
-    git clone https://github.com/redcanaryco/invoke-atomicredteam.git
-    Import-Module ./invoke-atomicredteam/Invoke-AtomicRedTeam.psd1 -Force
-    Invoke-AtomicTest T1003 ...
-```
-- Tools:
--Atomic Red Team
--Invoke-AtomicRedTeam
-
-- Purpose: Simulates MITRE ATT&CK techniques against the container or application.
-- Example: T1003 – Credential Dumping test.
-- Output: reports/mitre_T1003.json → JSON report mapping vulnerabilities to real-world adversarial behaviors.
-
-### 🔹 6. NIST CSF Mapping
-
-```
-- name: Map Results to NIST CSF
-  run: python scripts/mappings.py reports/ nist_report.json
-```
-
-- Purpose: Maps scan results from Trivy, Bandit, and MITRE ATT&CK into NIST Cybersecurity Framework (CSF) categories:
-- Identify → Asset discovery issues
-- Protect → Missing patches, insecure configs
-- Detect → Intrusion detection gaps
-- Respond/Recover → Response & recovery mechanisms
-
-### 🔹 7. Report Generation (Charts + PDF)
-
-```
-- name: Generate Charts
-  run: python scripts/gen_charts.py
-
-- name: Generate PDF Report
-  run: python scripts/generate_report.py
-```
-- Purpose: Produces a professional PDF report consolidating:
-- Vulnerability details
-- Severity breakdown (with charts)
-- NIST CSF mapping
-- MITRE ATT&CK mapping
-- OWASP Top 10 mapping
-
-
-### 🔹 8. Upload Artifacts
-
-```
-- name: Upload PDF Report
+- name: Upload Scan Report
   uses: actions/upload-artifact@v4
   with:
-    name: docker-vulnerability-report
-    path: report.pdf
+    name: qr-security-report
+    path: reports/
+
 ```
 
-- Purpose: Uploads both the PDF report and raw JSON reports as GitHub build artifacts.
-- Benefit: Results can be downloaded and reviewed by security teams after each workflow run.
+- Purpose: Makes reports available as GitHub CI/CD artifacts for download and review.
 
 
 
 
 
 
-## ⚡ Security Framework Integration  
-
-### 🔹 NIST Cybersecurity Framework (CSF)  
-The **NIST CSF** provides five functions: **Identify, Protect, Detect, Respond, Recover**.  
-Each vulnerability is automatically mapped to one of these functions.  
-For example:  
-- A missing patch may map to **Protect**.  
-- An insecure API exposure may map to **Detect/Respond**.  
-
-This ensures findings are not just technical but **aligned with compliance requirements**.  
-
-### 🔹 MITRE ATT&CK  
-The **MITRE ATT&CK** knowledge base describes how attackers exploit systems.  
-Vulnerabilities detected are mapped to adversarial techniques.  
-For example:  
-- Credential leakage → **T1003 (Credential Dumping)**.  
-- Insecure file permissions → **T1078 (Valid Accounts)**.  
-
-This allows security teams to understand **how real attackers might exploit vulnerabilities**.  
-
-### 🔹 OWASP Top 10  
-The **OWASP Top 10** is an industry-standard list of the most critical web application risks.  
-This scanner maps findings to OWASP categories, such as:  
-- **A01: Broken Access Control**  
-- **A03: Injection Attacks**  
-- **A04: Insecure Design**  
-
-This helps prioritize remediation according to **global best practices**.  
 
 ---
 
 ## 🎯 Purpose  
 The primary purpose of this project is to:  
-- **Automate vulnerability management** for Dockerized applications.  
-- Provide a **single, consolidated PDF report** instead of multiple scattered outputs.  
-- Help developers, DevOps, and security teams **integrate security into CI/CD pipelines (DevSecOps)**.  
-- Align findings with **compliance frameworks and attacker models**.  
+
+- Embed QR code threat detection directly into CI/CD pipelines.
+- Prevent phishing and malicious payload delivery via QR codes.
+- Provide security teams with quick remediation insights.
+- Align findings with DevSecOps principles for continuous security.
+
 
 ---
 
 ## ✅ Advantages  
 
-- **Automated** → Scans run automatically with every code push (via GitHub Actions).  
-- **Comprehensive** → Covers Docker images, source code, and dependencies.  
-- **Framework-Aware** → Maps to NIST CSF, MITRE ATT&CK, and OWASP Top 10.  
-- **Professional Reports** → PDF reports with charts, severity analysis, and framework mappings.  
-- **Open-Source & Extensible** → Easily add new scanners or frameworks.  
+
+- **Automated**: Runs on every push via GitHub Actions.
+- **Focused**: Specially designed to catch QR-based attack vectors.
+- **Lightweight**: Uses Python + open-source libraries.
+- **Actionable Reports**: Generates CI/CD artifacts for auditing.
+- **Integrable**: Can be extended with external threat intelligence feeds.
 
 ---
 
 ## ⚡ Challenges Faced  
 
-1. **Data Normalization** → Different scanners produce JSON in different formats.  
-2. **Framework Mapping** → Consistently mapping vulnerabilities across NIST, MITRE, and OWASP required custom logic (`mappings.py`).  
-3. **PDF Reporting** → Ensuring the final report is clear, visual, and boardroom-ready.  
-4. **Automation in CI/CD** → Ensuring scans work smoothly within GitHub Actions with minimal setup.  
+1. **False Positives**: Benign QR codes flagged due to generic patterns.
+2. **PDF Scanning**: Extracting embedded images from PDFs required extra parsing.
+3. **Content Obfuscation**: Detecting malicious intent in encoded QR payloads.
+4. **CI/CD Artifacts**: Ensuring reports were consistent and easy to interpret.
 
 ---
 
@@ -296,24 +200,24 @@ The primary purpose of this project is to:
 
 Below is a preview of the kind of report generated by the scanner:  
 
-![Download Vulnerability Test Report](https://github.com/ADITYADAS1999/Automated-Docker-Security-Scanner/blob/main/vulnerability_report.pdf)  
+![Download Vulnerability Test Report](https://github.com/ADITYADAS1999/Mailcious_QR_scan_CI_CD/actions/runs/17493757847/artifacts/3937089225)  
 
 The PDF includes:  
 - Vulnerability summary tables.  
 - Severity distribution charts.  
-- NIST CSF, MITRE ATT&CK, OWASP Top 10 mappings.  
+- Type of threat detected (e.g., phishing URL, malicious script, unsafe function)
+- Risk level (High / Medium / Low / Safe)
 - Final consolidated recommendations.  
 
 ---
 
 ## 🔚 Conclusion  
-The **Automated Docker Security Scanner** provides a **complete security assessment workflow** for containerized applications.  
-By integrating scanning tools with industry-standard frameworks, it transforms raw scan data into **actionable insights** that can guide both developers and security teams.  
+Mailcious_QR_scan_CI_CD strengthens CI/CD pipelines by detecting hidden QR code threats before they reach production. By combining automated scanning, content analysis, and report generation, it provides a practical DevSecOps tool for mitigating QR-based risks.
 
 Future Work:  
-- Add real-time **CVE database lookups**.  
-- Build a **web dashboard** for interactive vulnerability tracking.  
-- Extend support for more programming languages (Go, Java, etc.).  
+- Enhance detection with machine learning–based URL risk scoring.
+- Integrate with threat intelligence feeds for real-time blacklists.
+- Extend support for encrypted QR codes and multi-layer steganography.
 
 ---
 
